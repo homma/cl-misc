@@ -191,7 +191,7 @@ Lem の関数を使用するため、`lem` と `lem-base` を `use` していま
 
 `lem-base:current-point` で現在のカーソル位置を取り出しています。  
 `lem-base:insert-character` で、指定した場所に改行を書き込んでいます。  
-更に、`lem-base:insert-string` で文字列を出力します。  
+最後に、`lem-base:insert-string` で文字列を出力します。  
 
 ````lisp
 (defun write-buffer (str)
