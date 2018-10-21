@@ -49,9 +49,13 @@
              (let ((timeout *timeout*)
                    (interval *interval*))
                (if (listen-with-timeout timeout interval in)
-                   (%read-all (cons (read-line in) acc) in)
+                   (%read-all (concatenate 'string
+                                           (read-line in)
+                                           (string #\newline)
+                                           acc)
+                              in)
                    acc))))
-    (write-to-string (%read-all nil in))))
+    (%read-all nil in)))
 
 (defun write-and-flush (str out)
   (progn
