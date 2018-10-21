@@ -11,7 +11,7 @@
 (defvar *timeout* 0.05)
 (defvar *interval* 0.01)
 
-;;; start
+;;; start program
 
 (defun create-process (command)
   (setq *proc* (uiop:launch-program command
@@ -23,7 +23,7 @@
 (defun start (command)
   (create-process command))
 
-;;; stop
+;;; stop program
 
 (defun stop-process ()
   (uiop:close-streams *proc*)
@@ -33,7 +33,7 @@
 (defun stop ()
   (stop-process))
 
-;;; pwrite
+;;; write to program and read
 
 (defun listen-with-timeout (timeout interval in)
   (if (< timeout 0)
