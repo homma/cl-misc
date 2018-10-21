@@ -220,6 +220,9 @@ Lem からは `(load "lemsh")` でプログラムをロードすることがで�
 以下は `bc -lq` を実行して計算結果を受け取っている例です。
 
 ````lisp
+;; load program
+(load "lemsh")
+
 ;; create sub process
 (lemsh:start "bc -lq")
 
