@@ -83,7 +83,7 @@ Lem の関数を使用するため、`lem` と `lem-base` を `use` していま
 
 `uiop:launch-program` に OS コマンド名を文字列で渡してサブプロセスを作成します。  
 
-続いて、`*proc*`、`*p-in*`、`*p-out*` を設定しています。
+続いて、`*proc*`、`*p-in*`、`*p-out*` を設定しています。  
 サブプロセスの入力ストリームと出力ストリームは `uiop:process-info-input` と `uiop:process-info-output` で取得できます。
 
 最後に、`export` 用に関数をラップしています。
