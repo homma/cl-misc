@@ -13,11 +13,11 @@ Unicode の全角・半角判定ルーチンで使用するため、[EastAsianWi
 EastAsianWidth.txt のフォーマットを PEG で表すと以下のようになります。
 
 ````
-# EastAsianWidth.txt [ファイル] は [行] の 0 回以上の繰り返しの後に [EOF]
+# [ファイル] は [行] の 0 回以上の繰り返しの後に [EOF]
 FILE <- LINE* EOF
 
 # [行] は [文字コードの範囲][セミコロン][文字種][パディング][コメント][改行] または [コメント][改行]
-LINE <- CODE_RANGE SEMI KIND PADDING COMMENT
+LINE <- CODE_RANGE SEMI KIND PADDING COMMENT NL / COMMENT NL
 
 # [文字コードの範囲] は [文字コード][ドットドット][文字コード] または [文字コード]
 CODE_RANGE <- CHAR_CODE DOTDOT CHAR_CODE / CHAR_CODE
