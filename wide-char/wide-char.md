@@ -144,12 +144,12 @@ N : Neutral
 ````lisp
 ;;; string-parser : string -> function
 ;;
-;; str : string => stiring to match
+;; str : string = stiring to match
 ;; returns : function => parser
 ;;
 ;; parser : string -> parse result
 ;;
-;; data : string => sting to parse
+;; data : string = sting to parse
 ;; returns : parse result
 ;;
 ;; parse result : (matched? accepted-string string-for-further-parsing)
