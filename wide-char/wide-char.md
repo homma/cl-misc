@@ -90,8 +90,6 @@ DOTDOT <- ".."
 ;; ドットドットがない場合は [文字コード 1] と [文字コード 2] は同じ値
 ````
 
-なお、ここで文字コードの大文字アルファベットを小文字アルファベットに変換しておきます。
-
 ### 抽出
 
 変形が完了したら、[文字種] が全角文字に相当するものだけを抜き出します。  
@@ -121,6 +119,8 @@ N : Neutral
   (#x[文字コード] #x[文字コード]))
 ````
 
+文字コードのアルファベット部分は小文字にします。
+
 ## 実装
 
 ### 作成するパーサー
@@ -138,6 +138,51 @@ N : Neutral
 ヘルパー関数として以下を作成します。
 
 - modify : パース結果を変形するために、変形用関数を適用する関数
+
+### string-parser
+
+````lisp
+;;; string-parser : string -> function
+;;
+;; str : string => stiring to match
+;; returns : function => parser
+;;
+;; parser : string -> parse result
+;;
+;; data : string => sting to parse
+;; returns : parse result
+;;
+;; parse result : (matched? accepted-string string-for-further-parsing)
+;;
+(defun string-parser (str)
+  #'(lambda (data)
+      (let* ((substr (subseq data 0 (length str)))
+             (match (string= str substr))
+             (accepted
+               (if match
+                   substr
+                   nil))
+             (rest
+               (if match
+                   (subseq data (length str))
+                   str)))
+        (list match accepted rest))))
+
+;; test
+(defun test-string-parser
+    (let ((parser (string-parser "foo")))
+      (write (funcall parser "foo"))
+      (write (funcall parser "bar"))
+      (write (funcall parser "foobar"))))
+````
+
+### seq-parser
+
+### or-parser
+
+### rep1-parser
+
+### modify
 
 # メモ
 
