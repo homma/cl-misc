@@ -183,8 +183,8 @@ N : Neutral
 (defun success (parsed rest)
   (list t parsed rest))
 
-;; make failed result
-(defun failed (rest)
+;; make failure result
+(defun failure (rest)
   (list nil "" rest))
 ````
 
@@ -216,14 +216,14 @@ N : Neutral
             (%seq-parse (cons result acc)
                         (rest-string result)
                         (cdr parsers))
-            (failed nil)))))
+            (failure nil)))))
 
 (defun seq-parser (parsers)
   #'(lambda (data)
       (let ((result (%seq-parse nil data parsers)))
         (if (success-p result)
             result
-            (failed data))))))
+            (failure data))))))
 
 ;; test
       
