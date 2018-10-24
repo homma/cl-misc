@@ -218,7 +218,7 @@ N : Neutral
                            (parse (cons result acc)
                                   (rest-string result)
                                   (cdr parsers))
-                           nil)))))
+                           (failed nil))))))
         (let ((result (parse nil data parser-list)))
           (if (success-p result)
               result
