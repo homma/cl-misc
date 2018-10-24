@@ -176,7 +176,7 @@ N : Neutral
       (write (funcall parser "foobar"))))
 ````
 
-### Parser Result
+### parser result
 
 ````lisp
 ;; make success result
