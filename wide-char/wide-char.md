@@ -207,22 +207,23 @@ N : Neutral
 ### seq-parser
 
 ````lisp
-(defun seq-parser (parser-list)
+(defun %seq-parse (acc str parsers)
+  (if (not parsers)
+      (success acc str)
+      (let* ((parser (car parsers))
+             (result (funcall parser str)))
+        (if (success-p result)
+            (%seq-parse (cons result acc)
+                        (rest-string result)
+                        (cdr parsers))
+            (failed nil)))))
+
+(defun seq-parser (parsers)
   #'(lambda (data)
-      (labels ((parse (acc str parsers)
-                 (if (not parsers)
-                     (success acc str)
-                     (let* ((parser (car parsers))
-                            (result (funcall parser str)))
-                       (if (success-p result)
-                           (parse (cons result acc)
-                                  (rest-string result)
-                                  (cdr parsers))
-                           (failed nil))))))
-        (let ((result (parse nil data parser-list)))
-          (if (success-p result)
-              result
-              (failed data))))))
+      (let ((result (%seq-parse nil data parsers)))
+        (if (success-p result)
+            result
+            (failed data))))))
 
 ;; test
       
