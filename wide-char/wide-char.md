@@ -176,11 +176,73 @@ N : Neutral
       (write (funcall parser "foobar"))))
 ````
 
+### Parsing Result
+
+````lisp
+;; make success result
+(defun success (parsed rest)
+  (list t parsed rest))
+
+;; make failed result
+(defun failed (rest)
+  (list nil "" rest))
+````
+
+### accessor
+
+````lisp
+;; check if succeeded
+(defun success-p (parse-result)
+  (nth 0 parse-result))
+
+;; take parsed data
+(defun parsed (parse-result)
+  (nth 1 parse-result))
+
+;; take remaining string for further parsing
+(defun rest-string (parse-result)
+  (nth 2 parse-result))
+````
+
 ### seq-parser
+
+````lisp
+(defun seq-parser (parser-list)
+  #'(lambda (data)
+      (labels ((parse (acc str parsers)
+                 (if (not parsers)
+                     (success acc str)
+                     (let* ((parser (car parsers))
+                            (result (funcall parser str)))
+                       (if (success-p result)
+                           (parse (cons result acc)
+                                  (rest-string result)
+                                  (cdr parsers))
+                           nil)))))
+        (let ((result (parse nil data parser-list)))
+          (if (success-p result)
+              result
+              (failed data))))))
+
+;; test
+      
+````
 
 ### or-parser
 
+````lisp
+(defun or-parser (parser-list)
+  #'(lambda (data)
+      ;; to be implemented
+````
+
 ### rep1-parser
+
+````lisp
+(defun rep1-parser (parser)
+  #'(lambda (data)
+      ;; to be implemented
+````
 
 ### modify
 
