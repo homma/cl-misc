@@ -223,7 +223,7 @@ N : Neutral
       (let ((result (%seq-parse nil data parsers)))
         (if (success-p result)
             result
-            (failure data))))))
+            (failure data)))))
 
 ;; test
       
@@ -232,9 +232,21 @@ N : Neutral
 ### or-parser
 
 ````lisp
-(defun or-parser (parser-list)
+(defun %or-parse (str parsers)
+  (if (not parsers)
+      (failure nil)
+      (let* ((parser (car parsers))
+             (result (funcall parser str))
+        (if (success-p result)
+            result
+            (%or-parser str (cdr parsers))))))
+
+(defun or-parser (parsers)
   #'(lambda (data)
-      ;; to be implemented
+      (let ((result (%or-parse data parsers)))
+        (if (success-p result)
+            result
+            (failure data)))))
 ````
 
 ### rep1-parser
