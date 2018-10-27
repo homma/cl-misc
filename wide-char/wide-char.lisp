@@ -1,3 +1,31 @@
+;;;;;; Parser Data
+
+;;;; parse result
+
+;; make success result
+(defun success (parsed rest)
+  (list t parsed rest))
+
+;; make failure result
+(defun failure (rest)
+  (list nil "" rest))
+
+;;;; accessor
+
+;; check if succeeded
+(defun success-p (parse-result)
+  (nth 0 parse-result))
+
+;; take parsed data
+(defun parsed (parse-result)
+  (nth 1 parse-result))
+
+;; take remaining string for further parsing
+(defun rest-string (parse-result)
+  (nth 2 parse-result))
+
+;;;;;; Basic Parsers
+
 ;;;; string-parser
 
 ;; string-parser : string -> function
@@ -33,29 +61,26 @@
       (write (funcall parser "bar"))
       (write (funcall parser "foobar"))))
 
-;;;; parse result
+;; (test-string-parser)
 
-;; make success result
-(defun success (parsed rest)
-  (list t parsed rest))
+;;;; eol-parser
 
-;; make failure result
-(defun failure (rest)
-  (list nil "" rest))
+;; check if it reaches at the end of a string
+(defun eol-parser ()
+  #'(lambda (data)
+      (if (string= "" data)
+          (success "" data)
+          (failure data))))
 
-;;;; accessor
+;; test
+(defun test-eol-parser ()
+  (let ((parser (eol-parser)))
+    (print (funcall parser ""))
+    (print (funcall parser "foo"))))
 
-;; check if succeeded
-(defun success-p (parse-result)
-  (nth 0 parse-result))
+;; (test-eol-parser)
 
-;; take parsed data
-(defun parsed (parse-result)
-  (nth 1 parse-result))
-
-;; take remaining string for further parsing
-(defun rest-string (parse-result)
-  (nth 2 parse-result))
+;;;;;; Parser Combinators
 
 ;;;; seq-parser
 ;; take a list of parsers and run them one by one
@@ -154,6 +179,8 @@
 
 ;; (test-rep1-parser)
 
+;;;;;; Helper Function
+
 ;;;; modify
 ;; execute a parser then apply a function to the result to mutate it
 
@@ -177,14 +204,40 @@
 
 ;; (test-modify)
 
+;;;;;; Syntax Parsers
 
-;;;; Memo
+;;;; dotdot-parser
 
-;; (labels ((f (acc n)
-;;           (if (< n 0)
-;;               acc
-;;               (f (concatenate 'string
-;;                               (string-upcase (write-to-string n :base 16))
-;;                               "\" / \""
-;;                               acc) (1- n)))))
-;;  (princ (f "F" 14)))
+(defun dotdot-parser ()
+  (string-parser ".."))
+
+;;;; semi-parser
+
+(defun semi-parser ()
+  (string-parser ";"))
+
+;;;; hex-parser
+
+;; make a sequence as list of string
+(defun sequence-in-string (from to)
+  (labels ((sequence (acc from to)
+             (if (> from to)
+                 acc
+                 (sequence
+                  (cons (write-to-string to :base 16)
+                        acc)
+                  from
+                  (1- to)))))
+    (sequence nil from to)))
+
+;; test
+(defun test-sequence-in-string ()
+  (print (sequence-in-string 0 15))
+  (print (sequence-in-string 10 20))
+  (print (sequence-in-string 0 0)))
+
+;; (test-sequence-in-string)
+
+;; (defun hex-parser ()
+;;  (or-parser
+

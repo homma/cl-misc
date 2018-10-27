@@ -59,8 +59,8 @@ COMMENT <- "#" ANYCHAR
 - コメントの削除
 
 ````
-# [行] は [文字コードの範囲][セミコロン][文字種]
-LINE <- CODE_RANGE SEMI KIND
+# [行] は [文字コードの範囲][セミコロン][文字種][行末]
+LINE <- CODE_RANGE SEMI KIND END_OF_LINE
 
 # [文字コードの範囲] は [文字コード][ドットドット][文字コード] または [文字コード]
 CODE_RANGE <- CHAR_CODE DOTDOT CHAR_CODE / CHAR_CODE
@@ -79,6 +79,8 @@ SEMI <- ";"
 
 # [ドットドット] は ".."
 DOTDOT <- ".."
+
+# [行末] は省略
 ````
 
 ### 中間表現
@@ -128,6 +130,7 @@ N : Neutral
 作成するパーサーは以下の通りです。
 
 - string-parser : 文字列パーサー
+- eol-parser : 行末パーサー
 
 作成するパーサーコンビネータは以下の通りです。
 
@@ -142,18 +145,6 @@ N : Neutral
 ### string-parser
 
 ````lisp
-;;; string-parser : string -> function
-;;
-;; str : string == stiring to match
-;; returns : function == parser
-;;
-;; parser : string -> parse result
-;;
-;; data : string == sting to parse
-;; returns : parse result
-;;
-;; parse result : (matched? accepted-string string-for-further-parsing)
-;;
 (defun string-parser (str)
   #'(lambda (data)
       (let* ((substr (subseq data 0 (length str)))
