@@ -325,3 +325,35 @@
     (print (funcall parser "GHI"))))
 
 ;; (test-hex-parser)
+
+;;;; kind
+
+(defun %kind-parser ()
+  (or-parser
+   (list
+    (string-parser "F")
+    (string-parser "W")
+    (string-parser "H")
+    (string-parser "Na")
+    (string-parser "A")
+    (string-parser "N"))))
+
+;; test
+
+(defun test-kind-parser ()
+  (let ((parser (%kind-parser)))
+    (print (funcall parser "Na"))
+    (print (funcall parser "NA"))
+    (print (funcall parser "N012"))))
+
+(test-kind-parser)
+
+;;;; char-code
+
+(defun char-code-parser ()
+  (hex-parser))
+
+;;;; char-range
+
+
+;;;; line
