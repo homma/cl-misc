@@ -24,6 +24,10 @@
 (defun rest-string (parse-result)
   (nth 2 parse-result))
 
+;; take a list of results and concatenate their parsed string
+(defun concatenate-parsed (data)
+  (apply #'concatenate 'string (mapcar #'parsed data)))
+
 ;;;;;; Basic Parsers
 
 ;;;; string-parser
@@ -152,21 +156,22 @@
 ;; take one parser and repeat parsing at least once
 
 (defun %rep1-parse (acc str parser)
-  (if (= 0 (length str))
-      acc
+  (labels ((result (acc str)
+             (if acc
+                 (success (reverse acc) str)
+                 (failure str))))
+    (if (= 0 (length str))
+      (result acc str)
       (let* ((result (funcall parser str)))
         (if (success-p result)
             (%rep1-parse (cons result acc)
                          (rest-string result)
                          parser)
-            acc))))
+            (result acc str))))))
 
 (defun rep1-parser (parser)
   #'(lambda (data)
-      (let ((result (%rep1-parse nil data parser)))
-        (if (not result)
-            (failure data)
-            result))))
+      (%rep1-parse nil data parser)))
 
 ;; test
 
@@ -188,7 +193,7 @@
   #'(lambda (data)
       (let ((result (funcall parser data)))
         (if (success-p result)
-            (funcall fun result)
+            (success (funcall fun result) (rest-string result))
             result))))
 
 ;; test
@@ -196,7 +201,7 @@
 (defun test-modify ()
   (let* ((p1 (rep1-parser (string-parser "foo")))
          (modifier (lambda (data)
-                     (apply #'concatenate 'string (mapcar #'parsed data))))
+                     (concatenate-parsed (parsed data))))
          (parser (modify p1 modifier)))
     (print (funcall parser "foofoofoo"))
     (print (funcall parser "foobarfoo"))
@@ -218,6 +223,7 @@
 
 ;;;; hex-parser
 
+;; unused
 ;; make a sequence as list of string
 (defun sequence-in-string (from to)
   (labels ((sequence (acc from to)
@@ -230,6 +236,7 @@
                   (1- to)))))
     (sequence nil from to)))
 
+;; unused
 ;; test
 (defun test-sequence-in-string ()
   (print (sequence-in-string 0 15))
@@ -238,6 +245,83 @@
 
 ;; (test-sequence-in-string)
 
-;; (defun hex-parser ()
-;;  (or-parser
+;; unused
+;; parse one hex char
+(defun hex-char-parser ()
+  (let ((numbers (sequence-in-string 0 15)))
+    (labels ((parser-gen (acc numbers)
+               (if (not numbers)
+                   acc
+                   (let ((number (car numbers)))
+                     (parser-gen
+                      (cons (string-parser number) acc)
+                      (cdr numbers))))))
+      (or-parser (parser-gen nil numbers)))))
 
+;; unused
+;; test
+
+(defun test-hex-char-parser ()
+  (let ((parser (hex-char-parser)))
+    (print (funcall parser "0"))
+    (print (funcall parser "A"))
+    (print (funcall parser "f"))
+    (print (funcall parser "G"))))
+
+;; (test-hex-char-parser)
+
+;; unused
+;; (defun hex-parser ()
+;;   #'(lambda (data)
+;;       (let* ((p1 (hex-parser-gen))
+;;              (modifier (lambda (data)
+;;                          (concatenate-parsed (parsed data))))
+;;              (parser (modify p1 modifier)))
+;;         (funcall parser data))))
+
+;; returns a parser which parse hexadecimal string
+(defun %hex-parser ()
+  (rep1-parser
+   (or-parser
+    (list
+     (string-parser "0")
+     (string-parser "1")
+     (string-parser "2")
+     (string-parser "3")
+     (string-parser "4")
+     (string-parser "5")
+     (string-parser "6")
+     (string-parser "7")
+     (string-parser "8")
+     (string-parser "9")
+     (string-parser "A")
+     (string-parser "B")
+     (string-parser "C")
+     (string-parser "D")
+     (string-parser "E")
+     (string-parser "F")))))
+
+;; test
+(defun test-%hex-parser ()
+  (let ((parser (%hex-parser)))
+    (print (funcall parser "012"))
+    (print (funcall parser "ABC"))
+    (print (funcall parser "f01"))
+    (print (funcall parser "GHI"))))
+
+;; (test-%hex-parser)
+
+(defun hex-parser ()
+  (let ((modifier (lambda (data)
+                    (concatenate-parsed (parsed data)))))
+    (modify (%hex-parser) modifier)))
+
+;; test
+
+(defun test-hex-parser ()
+  (let ((parser (hex-parser)))
+    (print (funcall parser "0123DEF"))
+    (print (funcall parser "4567abc"))
+    (print (funcall parser "GHI"))))
+
+;; (test-hex-parser)
