@@ -328,7 +328,7 @@
 
 ;;;; kind
 
-(defun %kind-parser ()
+(defun kind-parser ()
   (or-parser
    (list
     (string-parser "F")
@@ -341,7 +341,7 @@
 ;; test
 
 (defun test-kind-parser ()
-  (let ((parser (%kind-parser)))
+  (let ((parser (kind-parser)))
     (print (funcall parser "Na"))
     (print (funcall parser "NA"))
     (print (funcall parser "N012"))))
