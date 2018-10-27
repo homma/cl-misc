@@ -76,7 +76,7 @@
 
 (defun %seq-parse (acc str parsers)
   (if (not parsers)
-      (success acc str)
+      (success (reverse acc) str)
       (let* ((parser (car parsers))
              (result (funcall parser str)))
         (if (success-p result)
@@ -111,19 +111,6 @@
         (if (success-p result)
             result
             (failure data)))))
-
-;; test
-
-(defun test-or-parser ()
-  (let ((parser (or-parser
-                 (list
-                  (string-parser "foo")
-                  (string-parser "bar")))))
-    (print (funcall parser "foo"))
-    (print (funcall parser "bar"))
-    (print (funcall parser "baz"))))
-
-;; (test-or-parser)
 
 ;;;; rep1-parser
 ;; take one parser and repeat parsing at least once
@@ -162,8 +149,15 @@
 
 ;;;; dotdot-parser
 
+;(defun dotdot-parser ()
+;  (string-parser ".."))
+
 (defun dotdot-parser ()
-  (string-parser ".."))
+  #'(lambda (data)
+      (if (> 2 (length data))
+          (failure data)
+          (let ((parser (string-parser "..")))
+            (funcall parser data)))))
 
 ;;;; semi-parser
 
@@ -194,10 +188,11 @@
      (string-parser "E")
      (string-parser "F")))))
 
+(defun hex-modifier (data)
+  (concatenate-parsed (parsed data)))
+
 (defun hex-parser ()
-  (let ((modifier (lambda (data)
-                    (concatenate-parsed (parsed data)))))
-    (modify (%hex-parser) modifier)))
+  (modify (%hex-parser) #'hex-modifier))
 
 ;;;; kind
 
@@ -218,5 +213,45 @@
 
 ;;;; char-range
 
+(defun single-char-code-modifier (data)
+  (list data () data))
+
+(defun %char-range-parser ()
+  (or-parser
+   (list
+    (seq-parser
+     (list
+      (char-code-parser)
+      (dotdot-parser)
+      (char-code-parser)))
+    (modify
+     (char-code-parser)
+     #'single-char-code-modifier))))
+
+(defun char-range-modifier (data)
+  (let ((p (parsed data)))
+    (list
+     (parsed (nth 0 p))
+     (parsed (nth 2 p)))))
+
+(defun char-range-parser ()
+  (modify (%char-range-parser) #'char-range-modifier))
 
 ;;;; line
+
+(defun %line-parser ()
+  (seq-parser
+   (list
+    (char-range-parser)
+    (semi-parser)
+    (kind-parser)
+    (eol-parser))))
+
+(defun line-modifier (data)
+  (let ((p (parsed data)))
+    (cons
+     (parsed (nth 2 p))
+     (parsed (nth 0 p)))))
+
+(defun line-parser ()
+  (modify (%line-parser) #'line-modifier))

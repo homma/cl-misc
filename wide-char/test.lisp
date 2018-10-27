@@ -95,5 +95,36 @@
 
 ;;;; char-range
 
+(defun test-%char-range-parser ()
+  (let ((parser (%char-range-parser)))
+    (print (funcall parser "10..20"))
+    (print (funcall parser "10"))
+    (print (funcall parser "ABC"))
+    (print (funcall parser "abc"))))
+
+;; (test-%char-range-parser)
+
+(defun test-char-range-parser ()
+  (let ((parser (char-range-parser)))
+    (print (funcall parser "10..20;"))
+    (print (funcall parser "10;"))
+    (print (funcall parser "ABC;"))
+    (print (funcall parser "abc;"))))
+
+;; (test-char-range-parser)
 
 ;;;; line
+
+(defun test-%line-parser ()
+  (let ((parser (%line-parser)))
+    (print (funcall parser "00..11;Na"))
+    (print (funcall parser "AA;W"))))
+
+;; (test-%line-parser)
+
+(defun test-line-parser ()
+  (let ((parser (line-parser)))
+    (print (funcall parser "00..11;Na"))
+    (print (funcall parser "AA;W"))))
+
+;; (test-line-parser)
