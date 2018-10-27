@@ -154,7 +154,31 @@
 
 ;; (test-rep1-parser)
 
-;;; modify
+;;;; modify
+;; execute a parser then apply a function to the result to mutate it
+
+(defun modify (parser fun)
+  #'(lambda (data)
+      (let ((result (funcall parser data)))
+        (if (success-p result)
+            (funcall fun result)
+            result))))
+
+;; test
+
+(defun test-modify ()
+  (let* ((p1 (rep1-parser (string-parser "foo")))
+         (modifier (lambda (data)
+                     (apply #'concatenate 'string (mapcar #'parsed data))))
+         (parser (modify p1 modifier)))
+    (print (funcall parser "foofoofoo"))
+    (print (funcall parser "foobarfoo"))
+    (print (funcall parser "barfoobar"))))
+
+;; (test-modify)
+
+
+;;;; Memo
 
 ;; (labels ((f (acc n)
 ;;           (if (< n 0)
