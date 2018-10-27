@@ -1,2 +1,2 @@
-(load "wide-char")
+(load "parser")
 (load "test")
