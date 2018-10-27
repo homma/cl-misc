@@ -346,7 +346,7 @@
     (print (funcall parser "NA"))
     (print (funcall parser "N012"))))
 
-(test-kind-parser)
+;; (test-kind-parser)
 
 ;;;; char-code
 
