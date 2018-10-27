@@ -24,7 +24,7 @@
 (defun rest-string (parse-result)
   (nth 2 parse-result))
 
-;; take a list of results and concatenate their parsed string
+;; take a list of a result and concatenate their parsed string
 (defun concatenate-parsed (data)
   (apply #'concatenate 'string (mapcar #'parsed data)))
 
