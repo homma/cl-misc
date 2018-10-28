@@ -453,7 +453,7 @@ PEG の `foo+` に相当します。
 
 文字コードの範囲は、`XXXX..YYYY` の形式と、`ZZZZ` の形式の 2 種類があるので、両方の場合に対応する処理を実装しています。
 
-`char-range-modifier` で文字コードの範囲のデータのみを抜き出し、16 進数文字列を数値に直しています。
+`char-range-modifier` で文字コードの範囲のデータのみを抜き出し、16 進数文字列を数値に変換しています。
 
 ````lisp
 (defun single-char-code-modifier (data)
