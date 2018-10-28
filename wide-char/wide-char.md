@@ -371,7 +371,8 @@ PEG の `foo+` に相当します。
 
 ### セミコロンパーサー
 
-`semi-parser` は `;` をパースするためだけのパーサーです。
+`semi-parser` は `;` をパースするためだけのパーサーです。  
+`string-parser` を使用して作成します。
 
 ````lisp
 (defun semi-parser ()
