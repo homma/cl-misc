@@ -88,9 +88,10 @@
 
 (defun %hexadecimalize (acc data)
   (let ((convert (lambda (num)
-                   (concatenate 'string
-                                "#x"
-                                (write-to-string num :base 16)))))
+                   (string-downcase
+                    (concatenate 'string
+                                 "#x"
+                                 (write-to-string num :base 16))))))
     (if (not data)
         (reverse acc)
         (let ((pivot (first data)))
@@ -103,12 +104,20 @@
 (defun hexadecimalize (data)
   (%hexadecimalize nil data))
 
+(defun make-output-string (data)
+  (write-to-string data))
+
 ;; (princ (hexadecimalize (merge-ranges (process-file))))
 
 (defun output-to-file ()
   (with-open-file (file
                    (make-pathname :name "output.txt")
-                   :direction :output)
-    (print (hexadecimalize (merge-ranges (process-file))) file)))
+                   :direction :io
+                   :if-exists :supersede)
+    (princ (make-output-string
+            (hexadecimalize
+             (merge-ranges
+              (process-file))))
+           file)))
 
 ;; (output-to-file)
