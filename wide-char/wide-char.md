@@ -23,8 +23,8 @@ EastAsianWidth.txt のフォーマットを PEG で表すと以下のように�
 # [ファイル] は [行] の 0 回以上の繰り返しの後に [EOF]
 FILE <- LINE* EOF
 
-# [行] は [文字コードの範囲][セミコロン][文字種][パディング][コメント][改行] または [コメント][改行]
-LINE <- CODE_RANGE SEMI KIND PADDING COMMENT NL / COMMENT NL
+# [行] は [文字コードの範囲][セミコロン][文字種][パディング][コメント][改行] または [コメント][改行] または空行
+LINE <- CODE_RANGE SEMI KIND PADDING COMMENT NL / COMMENT NL / NL
 
 # [文字コードの範囲] は [文字コード][ドットドット][文字コード] または [文字コード]
 CODE_RANGE <- CHAR_CODE DOTDOT CHAR_CODE / CHAR_CODE
@@ -62,7 +62,7 @@ COMMENT <- "#" ANYCHAR
 以下については前処理で実行することにして、先ほどの PEG を簡略化します。
 
 - 行の切り出し
-- コメントだけの行の削除
+- 空行およびコメントだけの行の削除
 - パディングの削除
 - コメントの削除
 
@@ -309,7 +309,7 @@ PEG の `foo / bar / baz` の記法に対応しています。
             (failure data)))))
 ````
 
-### rep1-parser
+### 1 回以上の繰り返しパーサー
 
 `rep1-parser` はパーサーを一つ受け取り、そのパーサーが 1 回以上連続で成功するかどうかを確認するパーサーです。
 
@@ -370,7 +370,7 @@ PEG の `foo+` に相当します。
             (funcall parser data)))))
 ````
 
-### セミパーサー
+### セミコロンパーサー
 
 `semi-parser` は ";" をパースするためだけのパーサーです。
 
@@ -379,7 +379,7 @@ PEG の `foo+` に相当します。
   (string-parser ";"))
 ````
 
-### hex-parser
+### 16 進数文字列パーサー
 
 `hex-parser` は 16 進数文字列をパースするパーサーです。
 
