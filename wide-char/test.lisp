@@ -117,6 +117,7 @@
 
 (defun test-%line-parser ()
   (let ((parser (%line-parser)))
+    (print (funcall parser "0000..001F;N"))
     (print (funcall parser "00..11;Na"))
     (print (funcall parser "AA;W"))))
 
@@ -124,6 +125,7 @@
 
 (defun test-line-parser ()
   (let ((parser (line-parser)))
+    (print (funcall parser "0000..001F;N"))
     (print (funcall parser "00..11;N"))
     (print (funcall parser "AA;W"))))
 

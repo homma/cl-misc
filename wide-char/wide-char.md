@@ -160,7 +160,7 @@ N : Neutral
 - char-range-parser : 文字コードの範囲をパースするパーサー
 - line-parser : 行をパースするパーサー
 
-### parse result
+### パース結果を表すデータ
 
 まず最初に、パーサーの返り値を作成するためのヘルパー関数を定義しておきます。  
 
@@ -177,7 +177,7 @@ N : Neutral
   (list nil "" rest))
 ````
 
-### accessor
+### パース結果内のデータへのアクセス
 
 パーシング結果のデータを処理するためのアクセッサも定義します。
 
@@ -203,7 +203,7 @@ N : Neutral
 (defun concatenate-parsed (data)
   (apply #'concatenate 'string (mapcar #'parsed data)))
 ````
-### string-parser
+### 文字列パーサー
 
 `string-parser` はパースする文字列を受け取って、その文字列をパースするパーサーを返します。  
 例えば、"foo" という文字列を受け取った場合は、"foo" をパースするパーサーを返します。 
@@ -219,7 +219,7 @@ N : Neutral
 (defun string-parser (str)
   (let ((len (length str)))
     #'(lambda (data)
-        (if (> (length data) len)
+        (if (< (length data) len)
             (failure data)
             (let* ((substr (subseq data 0 len))
                    (match (string= str substr)))
@@ -228,7 +228,7 @@ N : Neutral
                   (failure str)))))))
 ````
 
-### eol-parser
+### 行末パーサー
 
 行末を判定するパーサーです。  
 パースする文字列のサイズが 0 だった場合に、行末であると判断します。
@@ -241,7 +241,7 @@ N : Neutral
           (failure data))))
 ````
 
-### seq-parser
+### 順序パーサー
 
 ここからパーサーコンビネータの実装です。
 
@@ -271,7 +271,7 @@ N : Neutral
             (failure data)))))
 ````
 
-### or-parser
+### 選択パーサー
 
 `or-parser` は複数のパーサーを受け取って、そのいずれか一つがパースに成功するかどうかを確認するパーサーです。
 
@@ -326,7 +326,7 @@ PEG の `foo+` に相当します。
       (%rep1-parse nil data parser)))
 ````
 
-### modify
+### modify パーサー
 
 `modify` はパース結果を処理するためのパーサーです。
 
@@ -343,7 +343,7 @@ PEG の `foo+` に相当します。
             result))))
 ````
 
-### dotdot-parser
+### ドットドットパーサー
 
 `dotdot-parser` は ".." をパースするためだけのパーサーを返します。
 
@@ -358,7 +358,7 @@ PEG の `foo+` に相当します。
             (funcall parser data)))))
 ````
 
-### semi-parser
+### セミパーサー
 
 `semi-parser` は ";" をパースするためだけのパーサーです。
 
@@ -405,7 +405,7 @@ PEG の `foo+` に相当します。
   (modify (%hex-parser) #'hex-modifier))
 ````
 
-### kind
+### 文字種パーサー
 
 `kind-parser` は文字種をパースするパーサーです。
 
@@ -423,7 +423,7 @@ PEG の `foo+` に相当します。
     (string-parser "N"))))
 ````
 
-### char-code
+### 文字コードパーサー
 
 `char-code-parser` は文字コードをパースするパーサーを返します。  
 実装の実態は `hex-parser` です。
@@ -433,13 +433,15 @@ PEG の `foo+` に相当します。
   (hex-parser))
 ````
 
-### char-range
+### 文字コードの範囲パーサー
 
 `char-range-parser` は文字コードの範囲をパースするパーサーを返します。
 
 `char-code-parser` と `dotdot-parser` を組み合わせてパーサーを作成しています。
 
 文字コードの範囲は、"00..11" の形式と、"22" の形式があるので、両方の場合に対応する処理を実装しています。
+
+`char-range-modifier` で文字コードの範囲のデータのみを抜き出し、16 進数文字列を数値に直しています。
 
 ````lisp
 (defun single-char-code-modifier (data)
@@ -460,14 +462,14 @@ PEG の `foo+` に相当します。
 (defun char-range-modifier (data)
   (let ((p (parsed data)))
     (list
-     (parsed (nth 0 p))
-     (parsed (nth 2 p)))))
+     (parse-integer (parsed (nth 0 p)) :radix 16)
+     (parse-integer (parsed (nth 2 p)) :radix 16))))
 
 (defun char-range-parser ()
   (modify (%char-range-parser) #'char-range-modifier))
 ````
 
-### line
+### 行パーサー
 
 `line-parser` は行をパースするパーサーを返します。
 
@@ -492,3 +494,161 @@ PEG の `foo+` に相当します。
 (defun line-parser ()
   (modify (%line-parser) #'line-modifier))
 ````
+
+パーサーの実装は以上で終了です。
+
+## パーサーの実行
+
+### コメント行の確認
+
+````lisp
+(defun check-comment-line (line)
+  (or (string= "" line)
+      (string= "#" (subseq line 0 1))))
+````
+
+### コメントの除去
+
+````lisp
+(defun remove-comment (line)
+  (let ((position (position #\# line :test 'equal)))
+    (subseq line 0 position)))
+````
+
+### パディングの除去
+
+````lisp
+(defun remove-padding (line)
+  (string-right-trim " " line))
+````
+
+### 行のパース
+
+````lisp
+(defun parse-line (line)
+  (let* ((parser (line-parser))
+         (result (funcall parser line)))
+    (if (success-p result)
+        result
+        (error "[parse error] ~S" line))))
+````
+
+### 全角文字列データの抜き出し
+
+````lisp
+(defun select-wide (data)
+  (let* ((p (parsed data))
+         (kind (nth 0 p)))
+    (if (or (string= "F" kind)
+            (string= "W" kind))
+        (cdr p)
+        nil)))
+````
+
+### 行データに対する処理のまとめ
+
+````lisp
+(defun process-line (line)
+  (if (check-comment-line line)
+      nil
+      (select-wide
+       (parse-line
+        (remove-padding
+         (remove-comment line))))))
+````
+
+### ファイルのオープンとファイルに対する処理
+
+````lisp
+(defun process-file ()
+  (with-open-file (file
+                   (make-pathname :name "EastAsianWidth.txt"))
+    (labels ((process-lines (acc)
+               (let ((line (read-line file nil)))
+                 (if (not line)
+                     (reverse acc)
+                     (let ((result (process-line line)))
+                       (if (not result)
+                           (process-lines acc)
+                           (process-lines (cons result acc))))))))
+      (process-lines nil))))
+````
+
+### 連続する文字コードの連結
+
+````lisp
+(defun %merge-ranges (acc data)
+  (if (> 2 (length data))
+      (reverse (append data acc))
+      (let ((fst (nth 0 data))
+            (snd (nth 1 data))
+            (remains (nthcdr 2 data)))
+        (if (= (1+ (nth 1 fst))
+               (nth 0 snd))
+            (%merge-ranges acc
+                           (cons (list (nth 0 fst) (nth 1 snd))
+                                 remains))
+            (%merge-ranges (cons fst acc)
+                           (rest data))))))
+
+(defun merge-ranges (data)
+  (%merge-ranges nil data))
+````
+
+### 16 進数文字列への変換
+
+````lisp
+(defun %hexadecimalize (acc data)
+  (let ((convert (lambda (num)
+                   (concatenate 'string
+                                "#x"
+                                (write-to-string num :base 16)))))
+    (if (not data)
+        (reverse acc)
+        (let ((pivot (first data)))
+          (%hexadecimalize
+           (cons (list (funcall convert (nth 0 pivot))
+                       (funcall convert (nth 1 pivot)))
+                 acc)
+           (rest data))))))
+
+(defun hexadecimalize (data)
+  (%hexadecimalize nil data))
+````
+
+### 全ての処理のまとめと結果の出力
+
+````lisp
+(defun output-to-file ()
+  (with-open-file (file
+                   (make-pathname :name "output.txt")
+                   :direction :output)
+    (print (hexadecimalize (merge-ranges (process-file))) file)))
+````
+
+### 処理の実行
+
+`output.txt` ファイルに結果が格納されます。
+
+````lisp
+(output-to-file)
+````
+
+## 終わりに
+
+### このプログラムの用途
+
+最近使い始めたソフトウェアが対応している Unicode のバージョンが 7 でした。  
+現在最新の Unicode のバージョンは 11 です。
+
+Unicode 7 で困ることは、絵文字の全角判定です。  
+絵文字を全角とすることは Unicode 9 で推奨となりました。  
+そのため、Unicode 9 より前のバージョンに対応している実装では、絵文字が半角文字とみなされてしまうことがあります。
+
+これを避けるため、最新の Unicode バージョンに対応する必要がありました。
+
+### 実装してみて
+
+パーサーコンビネータは簡単に作成できて楽しい！
+
+`おしまい`

@@ -47,7 +47,7 @@
 (defun string-parser (str)
   (let ((len (length str)))
     #'(lambda (data)
-        (if (> (length data) len)
+        (if (< (length data) len)
             (failure data)
             (let* ((substr (subseq data 0 len))
                    (match (string= str substr)))
@@ -228,8 +228,8 @@
 (defun char-range-modifier (data)
   (let ((p (parsed data)))
     (list
-     (parsed (nth 0 p))
-     (parsed (nth 2 p)))))
+     (parse-integer (parsed (nth 0 p)) :radix 16)
+     (parse-integer (parsed (nth 2 p)) :radix 16))))
 
 (defun char-range-parser ()
   (modify (%char-range-parser) #'char-range-modifier))

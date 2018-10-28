@@ -4,3 +4,5 @@
 
 (load "run")
 
+(output-to-file)
+
