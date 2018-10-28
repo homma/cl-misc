@@ -104,20 +104,42 @@
 (defun hexadecimalize (data)
   (%hexadecimalize nil data))
 
-(defun make-output-string (data)
-  (write-to-string data))
-
 ;; (princ (hexadecimalize (merge-ranges (process-file))))
+
+(defun %list-to-string (list)
+  (concatenate 'string
+               "'("
+               (nth 0 list)
+               " "
+               (nth 1 list)
+               ")"))
+
+
+(defun make-output-string ()
+  (let ((data (hexadecimalize (merge-ranges (process-file))))
+        (width 4))
+    (labels ((list-to-string (acc newline data)
+               (if (not data)
+                   acc
+                   (let ((pivot (first data))
+                         (nl (= 0 (mod newline width))))
+                     (list-to-string
+                      (concatenate 'string
+                                   acc
+                                   (%list-to-string pivot)
+                                   (if nl
+                                       (string #\newline)
+                                       " "))
+                      (1+ newline)
+                      (rest data))))))
+      (list-to-string "" 1 data))))
 
 (defun output-to-file ()
   (with-open-file (file
                    (make-pathname :name "output.txt")
                    :direction :io
                    :if-exists :supersede)
-    (princ (make-output-string
-            (hexadecimalize
-             (merge-ranges
-              (process-file))))
+    (princ (make-output-string)
            file)))
 
 ;; (output-to-file)

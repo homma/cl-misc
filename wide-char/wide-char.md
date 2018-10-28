@@ -117,10 +117,10 @@ N : Neutral
 最終的に以下の形式で出力します。
 
 ````lisp
-'((#x[文字コード] #x[文字コード])
-  (#x[文字コード] #x[文字コード])
+'(#x[文字コード] #x[文字コード])
+'(#x[文字コード] #x[文字コード])
   ...
-  (#x[文字コード] #x[文字コード]))
+'(#x[文字コード] #x[文字コード]))
 ````
 
 文字コードのアルファベット部分は小文字にします。
@@ -616,14 +616,48 @@ PEG の `foo+` に相当します。
   (%hexadecimalize nil data))
 ````
 
+### 出力したい文字列への変換
+
+````lisp
+(defun %list-to-string (list)
+  (concatenate 'string
+               "'("
+               (nth 0 list)
+               " "
+               (nth 1 list)
+               ")"))
+
+
+(defun make-output-string ()
+  (let ((data (hexadecimalize (merge-ranges (process-file))))
+        (width 4))
+    (labels ((list-to-string (acc newline data)
+               (if (not data)
+                   acc
+                   (let ((pivot (first data))
+                         (nl (= 0 (mod newline width))))
+                     (list-to-string
+                      (concatenate 'string
+                                   acc
+                                   (%list-to-string pivot)
+                                   (if nl
+                                       (string #\newline)
+                                       " "))
+                      (1+ newline)
+                      (rest data))))))
+      (list-to-string "" 1 data))))
+````
+
 ### 全ての処理のまとめと結果の出力
 
 ````lisp
 (defun output-to-file ()
   (with-open-file (file
                    (make-pathname :name "output.txt")
-                   :direction :output)
-    (print (hexadecimalize (merge-ranges (process-file))) file)))
+                   :direction :io
+                   :if-exists :supersede)
+    (princ (make-output-string)
+           file)))
 ````
 
 ### 処理の実行
