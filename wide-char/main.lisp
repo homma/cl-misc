@@ -1,2 +1,6 @@
 (load "parser")
-(load "test")
+
+;; (load "test")
+
+(load "run")
+

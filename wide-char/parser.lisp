@@ -45,18 +45,15 @@
 ;; parse result : (matched? accepted-string string-for-further-parsing)
 ;;
 (defun string-parser (str)
-  #'(lambda (data)
-      (let* ((substr (subseq data 0 (length str)))
-             (match (string= str substr))
-             (accepted
-               (if match
-                   substr
-                   nil))
-             (rest
-               (if match
-                   (subseq data (length str))
-                   str)))
-        (list match accepted rest))))
+  (let ((len (length str)))
+    #'(lambda (data)
+        (if (> (length data) len)
+            (failure data)
+            (let* ((substr (subseq data 0 len))
+                   (match (string= str substr)))
+              (if match
+                  (success substr (subseq data len))
+                  (failure str)))))))
 
 ;;;; eol-parser
 

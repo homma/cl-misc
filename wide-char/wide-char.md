@@ -160,38 +160,11 @@ N : Neutral
 - char-range-parser : 文字コードの範囲をパースするパーサー
 - line-parser : 行をパースするパーサー
 
-### string-parser
-
-`string-parser` はパースする文字列を受け取って、その文字列をパースするパーサーを返します。  
-例えば、"foo" という文字列を受け取った場合は、"foo" をパースするパーサーを返します。 
-
-`string-parser` から返される関数は無名関数（クロージャ）です。  
-"foo" をパースするパーサー関数の場合は、引数にパースする文字列を受け取り、その文字列が "foo" で開始されるかを確認します。  
-返り値として、`([パーシングが成功したか] [パースされた文字列] [パース済みの部分を取り除いた残りの文字列])` を返します。
-
-````lisp
-;; string-parser : string -> function
-;; str : string -- パースする文字列
-(defun string-parser (str)
-  #'(lambda (data)
-      (let* ((substr (subseq data 0 (length str)))
-             (match (string= str substr))
-             (accepted
-               (if match
-                   substr
-                   nil))
-             (rest
-               (if match
-                   (subseq data (length str))
-                   str)))
-        (list match accepted rest))))
-````
-
 ### parse result
 
-パーサーが返すデータを作成するためのヘルパー関数を定義しておきます。  
+まず最初に、パーサーの返り値を作成するためのヘルパー関数を定義しておきます。  
 
-データの形式は、`([パーシングが成功したか] [パースされた文字列] [パース済みの部分を取り除いた残りの文字列])` です。  
+返り値の形式は、`([パーシングが成功したか] [パースされた文字列] [パース済みの部分を取り除いた残りの文字列])` です。  
 パーシングが成功した場合は、リストの先頭が `t` になります。
 
 ````lisp
@@ -229,6 +202,30 @@ N : Neutral
 ;; take a list of results and concatenate their parsed string
 (defun concatenate-parsed (data)
   (apply #'concatenate 'string (mapcar #'parsed data)))
+````
+### string-parser
+
+`string-parser` はパースする文字列を受け取って、その文字列をパースするパーサーを返します。  
+例えば、"foo" という文字列を受け取った場合は、"foo" をパースするパーサーを返します。 
+
+`string-parser` から返される関数は無名関数（クロージャ）です。  
+"foo" をパースするパーサー関数の場合は、引数にパースする文字列を受け取り、その文字列が "foo" で開始されるかを確認します。  
+
+先ほど作成した `success` と `failure` でパース結果を返しています。
+
+````lisp
+;; string-parser : string -> function
+;; str : string -- パースする文字列
+(defun string-parser (str)
+  (let ((len (length str)))
+    #'(lambda (data)
+        (if (> (length data) len)
+            (failure data)
+            (let* ((substr (subseq data 0 len))
+                   (match (string= str substr)))
+              (if match
+                  (success substr (subseq data len))
+                  (failure str)))))))
 ````
 
 ### eol-parser
