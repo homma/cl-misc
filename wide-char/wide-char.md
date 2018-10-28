@@ -4,7 +4,7 @@ Title: EastAsianWidth.txt から全角文字の範囲を示すデータを作成
 ## はじめに
 
 Unicode の全角・半角判定ルーチンで使用するため、[EastAsianWidth.txt](http://ftp.unicode.org/Public/UNIDATA/EastAsianWidth.txt) をパースして、全角文字の範囲を示すデータを作成します。  
-パーサーコンビネーターを使ってみたいので、正規表現は使用禁止とします。
+パーサーコンビネーターを使ってみたいので、正規表現は使用しません。
 
 ## 今回実装する内容
 
