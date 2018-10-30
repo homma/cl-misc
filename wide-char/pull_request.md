@@ -1,20 +1,75 @@
+# PR details
+
+branch name : eastasianwidth-11
+commit message : support EastAsianWidth 11.0.0 fullwidth characters
+
 # PR message
 
-Lem currently supports Unicode 7.0 East Asian width property
-as its character width handling.
+Lem currently supports Unicode 7.0 East Asian Width property for its character width handling.
 
-It would be nice to update it to the latest Unicode 11.0 version
-so that it can properly display newly added wide characters
-such as emoji.
+It would be nice to update it to the latest Unicode 11.0 version so that it can properly display newly introduced wide characters such as emoji.
 
-This patch includes a machine generated wide char table using
-the latest EastAsianWidth.txt below.
+This patch includes a machine generated wide char table using the latest EastAsianWidth.txt below.
+
+- http://ftp.unicode.org/Public/UNIDATA/EastAsianWidth.txt
+
+You can compare it with the other implementations.
+
+VIM : https://github.com/vim/vim/blob/master/src/mbyte.c#L1419  
+Emacs : https://github.com/emacs-mirror/emacs/blob/master/lisp/international/characters.el#L1172
+
+## Fixes
+
+````lisp
+(write-to-string #\🔥)
+=> "#\\FIRE"
+(write-to-string (char-code #\FIRE) :base 16)
+=> "1F525"
+(lem:wide-char-p #\FIRE)
+=> t
+;; it is nil in the current Lem implementaion
+````
+
+## Note 1
+
+Although it is out of the scope of this PR, there remains some problems denoted in the following document.
+
+- https://github.com/hamano/locale-eaw
+
+### Example
+
+````lisp
+(write-to-string #\🌶)
+=> "#\\HOT_PEPPER"
+(write-to-string (char-code #\HOT_PEPPER) :base 16)
+=> 1F336
+(lem:wide-char-p #\HOT_PEPPER)
+=> nil
+;; HOT PEPPER is considered Neutral in the EastAsianWidth.txt
+````
+
+## Note 2
+
+Support for Ambiguous characters are out of the scope of this PR too.
+
+- https://www.unicode.org/reports/tr11/#Ambiguous
+
+----
+// old memo
+
+# PR message
+
+Lem currently supports Unicode 7.0 East Asian width property as its character width handling.
+
+It would be nice to update it to the latest Unicode 11.0 version so that it can properly display newly added wide characters such as emoji.
+
+This patch includes a machine generated wide char table using the latest EastAsianWidth.txt below.
 
 - http://ftp.unicode.org/Public/UNIDATA/EastAsianWidth.txt
 
 You can compare it with other implementations.
 
-VIM : https://github.com/vim/vim/blob/master/src/mbyte.c#L1419
+VIM : https://github.com/vim/vim/blob/master/src/mbyte.c#L1419  
 Emacs : https://github.com/emacs-mirror/emacs/blob/master/lisp/international/characters.el#L1172
 
 # Fixes
