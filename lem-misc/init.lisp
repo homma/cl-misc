@@ -1,4 +1,5 @@
-;; 
+
+;; https://raw.githubusercontent.com/homma/cl-misc/master/lem-misc/init.lisp
 
 ;; (lem-vi-mode:vi-mode)
 
