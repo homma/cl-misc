@@ -12,8 +12,9 @@
 ;; color theme
 (lem:define-color-theme "soft-light" ("emacs-light")
   (lem:syntax-comment-attribute :foreground "gray59")
-  (lem:syntax-constant-attribute :foreground "dark orange")
-  (lem:syntax-keyword-attribute :foreground "green")
-  (lem:syntax-builtin-attribute :foreground "green"))
+  (lem:syntax-string-attribute :foreground "dark green")
+  (lem:syntax-constant-attribute :foreground "blue")
+  (lem:syntax-keyword-attribute :foreground "blue")
+  (lem:syntax-builtin-attribute :foreground "blue"))
 
 (lem:load-theme "soft-light") 
