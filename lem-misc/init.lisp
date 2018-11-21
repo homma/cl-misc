@@ -10,5 +10,8 @@
 (define-key *global-keymap* "C-x l" 'lem-lisp-mode:lisp-mode)
 
 ;; color theme
-;; default is "emacs-dark"
-(lem:load-theme "emacs-light")
+(lem:define-color-theme "soft-light" ("emacs-light")
+  (lem:syntax-comment-attribute :foreground "gray59")
+  (lem:syntax-keyword-attribute :foreground "green"))
+
+(lem:load-theme "soft-light") 
